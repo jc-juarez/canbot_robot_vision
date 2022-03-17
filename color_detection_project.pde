@@ -6,6 +6,8 @@ import processing.video.*;
 
 Capture video;
 
+int[] data = new int[14];
+
 color redColor; 
 color blueColor;
 float threshold = 25;
@@ -13,6 +15,16 @@ float threshold = 25;
 int logTracker;
 int redDetected;
 int blueDetected;
+
+int rightGrabPointXRed;
+int rightGrabPointYRed;
+int leftGrabPointXRed;
+int leftGrabPointYRed;
+
+int rightGrabPointXBlue;
+int rightGrabPointYBlue;
+int leftGrabPointXBlue;
+int leftGrabPointYBlue;
 
 int minXRed;
 int maxXRed;
@@ -44,6 +56,16 @@ void setup() {
   maxXBlue = Integer.MIN_VALUE;
   minYBlue = Integer.MAX_VALUE;
   maxYBlue = Integer.MIN_VALUE;
+  
+  rightGrabPointXRed = 0;
+  rightGrabPointYRed = 0;
+  leftGrabPointXRed = 0;
+  leftGrabPointYRed = 0;
+  
+  rightGrabPointXBlue = 0;
+  rightGrabPointYBlue = 0;
+  leftGrabPointXBlue = 0;
+  leftGrabPointYBlue = 0;
 }
 
 void captureEvent(Capture video) {
@@ -146,6 +168,19 @@ void draw() {
     line(minXRed, minYRed,maxXRed, minYRed);
     line(minXRed, maxYRed,maxXRed, maxYRed);
     line(maxXRed, maxYRed,maxXRed, minYRed);
+    
+    leftGrabPointXRed = minXRed - 30;
+    leftGrabPointYRed = (minYRed + maxYRed) / 2;
+    rightGrabPointXRed = maxXRed + 30;
+    rightGrabPointYRed = leftGrabPointYRed;
+    strokeWeight(2.0);
+    fill(50, 227, 91);
+    circle(leftGrabPointXRed, leftGrabPointYRed, 10);
+    circle(rightGrabPointXRed, rightGrabPointYRed, 10);
+    line(avgXRed, avgYRed,leftGrabPointXRed, leftGrabPointYRed);
+    line(avgXRed, avgYRed,rightGrabPointXRed, rightGrabPointYRed);
+    
+    
   }
   
   if (countBlue > 0) { 
@@ -166,6 +201,17 @@ void draw() {
     line(minXBlue, minYBlue,maxXBlue, minYBlue);
     line(minXBlue, maxYBlue,maxXBlue, maxYBlue);
     line(maxXBlue, maxYBlue,maxXBlue, minYBlue);
+    
+    leftGrabPointXBlue = minXBlue - 30;
+    leftGrabPointYBlue = (minYBlue + maxYBlue) / 2;
+    rightGrabPointXBlue = maxXBlue + 30;
+    rightGrabPointYBlue = leftGrabPointYBlue;
+    strokeWeight(2.0);
+    fill(50, 227, 91);
+    circle(leftGrabPointXBlue, leftGrabPointYBlue, 10);
+    circle(rightGrabPointXBlue, rightGrabPointYBlue, 10);
+    line(avgXBlue, avgYBlue,leftGrabPointXBlue, leftGrabPointYBlue);
+    line(avgXBlue, avgYBlue,rightGrabPointXBlue, rightGrabPointYBlue);
   }
   
   if(redDetected == 1 && blueDetected == 1){
@@ -176,11 +222,36 @@ void draw() {
     println(logTracker," -> Blue Object: [ minX : ", minXBlue, " | maxX : ", maxXBlue, " | minY : ", minYBlue, " | maxY : ", maxYBlue, " ]");
   }
   
-  if(redDetected == 1 || blueDetected == 1) logTracker++;
+  // Setting Data Transfer
+  
+  data[0] = redDetected;
+  data[1] = minXRed;
+  data[2] = maxXRed;
+  data[3] = minYRed;
+  data[4] = maxYRed;
+  data[5] = int(avgXRed);
+  data[6] = int(avgYRed);
+  
+  data[7] = blueDetected;
+  data[8] = minXBlue;
+  data[9] = maxXBlue;
+  data[10] = minYBlue;
+  data[11] = maxYBlue;
+  data[12] = int(avgXBlue);
+  data[13] = int(avgYBlue);
+  
+  if(redDetected == 1 || blueDetected == 1) {
+    logTracker++;
+    thread("writeToPipe");
+  }
   
 }
 
 float distSq(float x1, float y1, float z1, float x2, float y2, float z2) {
   float d = (x2-x1)*(x2-x1) + (y2-y1)*(y2-y1) +(z2-z1)*(z2-z1);
   return d;
+}
+
+void writeToPipe() {
+  saveStrings("../myfifo", str(data));
 }
