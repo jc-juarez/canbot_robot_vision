@@ -30,8 +30,8 @@ void captureEvent(Capture video) {
 
 void draw() {
   video.loadPixels();
-  background(0);
-  fill(1);
+  //background(0);
+  //fill(1);
   image(video, 0, 0);
 
   //threshold = map(mouseX, 0, width, 0, 100);
@@ -94,7 +94,7 @@ void draw() {
     println(logTracker," - Center of Red Object Detected");
     logTracker++;
     fill(245, 60, 32);
-    rect(avgXRed, avgYRed, 50, 180);
+    circle(avgXRed, avgYRed, 35);
   }
   
     if (countBlue > 0) { 
@@ -106,8 +106,9 @@ void draw() {
     println(logTracker," - Center of Blue Object Detected");
     logTracker++;
     fill(35, 110, 232);
-    rect(avgXBlue, avgYBlue, 50, 180);
+    circle(avgXBlue, avgYBlue, 35);
   }
+  
 }
 
 float distSq(float x1, float y1, float z1, float x2, float y2, float z2) {
