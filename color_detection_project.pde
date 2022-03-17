@@ -12,6 +12,18 @@ color blueColor;
 float threshold = 25;
 
 int logTracker;
+int redDetected;
+int blueDetected;
+
+int minXRed;
+int maxXRed;
+int minYRed;
+int maxYRed;
+
+int minXBlue;
+int maxXBlue;
+int minYBlue;
+int maxYBlue;
 
 void setup() {
   size(640, 360);
@@ -22,6 +34,17 @@ void setup() {
   redColor = color(245, 60, 32);
   blueColor = color(35, 110, 232);
   logTracker = 0;
+  redDetected = 0;
+  blueDetected = 0;
+  minXRed = Integer.MAX_VALUE;
+  maxXRed = Integer.MIN_VALUE;
+  minYRed = Integer.MAX_VALUE;
+  maxYRed = Integer.MIN_VALUE;
+
+  minXBlue = Integer.MAX_VALUE;
+  maxXBlue = Integer.MIN_VALUE;
+  minYBlue = Integer.MAX_VALUE;
+  maxYBlue = Integer.MIN_VALUE;
 }
 
 void captureEvent(Capture video) {
@@ -33,6 +56,19 @@ void draw() {
   //background(0);
   //fill(1);
   image(video, 0, 0);
+  
+  redDetected = 0;
+  blueDetected = 0;
+  
+  minXRed = Integer.MAX_VALUE;
+  maxXRed = Integer.MIN_VALUE;
+  minYRed = Integer.MAX_VALUE;
+  maxYRed = Integer.MIN_VALUE;
+
+  minXBlue = Integer.MAX_VALUE;
+  maxXBlue = Integer.MIN_VALUE;
+  minYBlue = Integer.MAX_VALUE;
+  maxYBlue = Integer.MIN_VALUE;
 
   //threshold = map(mouseX, 0, width, 0, 100);
   threshold = 80;
@@ -71,6 +107,10 @@ void draw() {
         avgXRed += x;
         avgYRed += y;
         countRed++;
+        minXRed = Math.min(minXRed,x);
+        maxXRed = Math.max(maxXRed,x);
+        minYRed = Math.min(minYRed,y);
+        maxYRed = Math.max(maxYRed,y);
       }
       if (dBlue < threshold*threshold) {
         //stroke(255);
@@ -79,6 +119,10 @@ void draw() {
         avgXBlue += x;
         avgYBlue += y;
         countBlue++;
+        minXBlue = Math.min(minXBlue,x);
+        maxXBlue = Math.max(maxXBlue,x);
+        minYBlue = Math.min(minYBlue,y);
+        maxYBlue = Math.max(maxYBlue,y);
       }
     }
   }
@@ -91,33 +135,53 @@ void draw() {
     strokeWeight(4.0);
     stroke(1);
     // Found something
-    println(logTracker," - Center of Red Object Detected");
-    logTracker++;
+    redDetected = 1;
     fill(245, 60, 32);
     circle(avgXRed, avgYRed, 35);
+    stroke(255,255,255);
+    circle(minXRed, maxYRed, 15);
+    circle(minXRed, minYRed, 15);
+    circle(maxXRed, maxYRed, 15);
+    circle(maxXRed, minYRed, 15);
+    line(minXRed, maxYRed,minXRed, minYRed);
+    line(minXRed, minYRed,maxXRed, minYRed);
+    line(minXRed, maxYRed,maxXRed, maxYRed);
+    line(maxXRed, maxYRed,maxXRed, minYRed);
   }
   
-    if (countBlue > 0) { 
+  if (countBlue > 0) { 
     avgXBlue = avgXBlue / countBlue;
     avgYBlue = avgYBlue / countBlue;
     strokeWeight(4.0);
     stroke(1);
     // Found something
-    println(logTracker," - Center of Blue Object Detected");
-    logTracker++;
+    blueDetected = 1;
     fill(35, 110, 232);
     circle(avgXBlue, avgYBlue, 35);
+    stroke(255,255,255);
+    circle(minXBlue, maxYBlue, 15);
+    circle(minXBlue, minYBlue, 15);
+    circle(maxXBlue, maxYBlue, 15);
+    circle(maxXBlue, minYBlue, 15);
+    line(minXBlue, maxYBlue,minXBlue, minYBlue);
+    line(minXBlue, minYBlue,maxXBlue, minYBlue);
+    line(minXBlue, maxYBlue,maxXBlue, maxYBlue);
+    line(maxXBlue, maxYBlue,maxXBlue, minYBlue);
   }
+  
+  if(redDetected == 1 && blueDetected == 1){
+    println(logTracker," -> Red Object: [ minX : ", minXRed, " | maxX : ", maxXRed, " | minY : ", minYRed, " | maxY : ", maxYRed, " ] // Blue Object: [ minX : ", minXBlue, " | maxX : ", maxXBlue, " | minY : ", minYBlue, " | maxY : ", maxYBlue, " ]");
+  } else if(redDetected == 1){
+    println(logTracker," -> Red Object: [ minX : ", minXRed, " | maxX : ", maxXRed, " | minY : ", minYRed, " | maxY : ", maxYRed, " ]");
+  } else if(blueDetected == 1){
+    println(logTracker," -> Blue Object: [ minX : ", minXBlue, " | maxX : ", maxXBlue, " | minY : ", minYBlue, " | maxY : ", maxYBlue, " ]");
+  }
+  
+  if(redDetected == 1 || blueDetected == 1) logTracker++;
   
 }
 
 float distSq(float x1, float y1, float z1, float x2, float y2, float z2) {
   float d = (x2-x1)*(x2-x1) + (y2-y1)*(y2-y1) +(z2-z1)*(z2-z1);
   return d;
-}
-
-void mousePressed() {
-  // Save color where the mouse is clicked in redColor variable
-  int loc = mouseX + mouseY*video.width;
-  redColor = video.pixels[loc];
 }
