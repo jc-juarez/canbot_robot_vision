@@ -1,7 +1,6 @@
-// Daniel Shiffman
-// http://codingtra.in
-// http://patreon.com/codingtrain
-// Code for: https://youtu.be/nCVZHROb_dE
+// Team 2
+// Robots Vision
+// Tecnológico de Monterrey
 
 import processing.video.*;
 
